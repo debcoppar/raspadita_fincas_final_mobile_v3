@@ -1,0 +1,205 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Halloween Fincas 2025 – Descubrí tu color</title>
+<meta name="theme-color" content="#000000">
+<style>
+  :root{ --headerH:86px; }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; background:#000; color:#ececf1;
+    font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Helvetica,Arial;
+    padding-top:var(--headerH);
+    display:flex; align-items:flex-start; justify-content:center; padding-left:12px; padding-right:12px;
+  }
+  header{position:fixed; top:0; left:0; right:0; background:#000; z-index:9999;}
+  header .inner{max-width:820px; margin:0 auto; padding:10px 14px;}
+  header .row{display:flex; align-items:center; gap:12px;}
+  header img{height:40px; width:auto; border-radius:6px;}
+  header .t1{font-weight:800; font-size:clamp(16px,4.5vw,22px); line-height:1.05}
+  header .t2{color:#ff7a00; font-weight:600; font-size:clamp(12px,3.5vw,16px); line-height:1.15}
+
+  .wrap{width:min(780px,100%);}
+  .card{background:#121219; border:1px solid #2b2b36; border-radius:16px; padding:18px}
+  .sub{color:#a6a6b3; margin:0 0 12px}
+  form{display:flex; gap:10px; flex-wrap:wrap; margin:8px 0 12px}
+  input[type="text"]{flex:1 1 260px; padding:14px 16px; border-radius:12px; border:1px solid #2b2b36; background:#0e0e14; color:#ececf1; font-size:16px; outline:none}
+  input::placeholder{color:#6a6a77}
+  button{padding:14px 16px; border-radius:12px; border:0; background:#ff7a00; color:#121212; font-weight:800; cursor:pointer; flex:0 0 auto}
+  button.ghost{background:#1c1c27; color:#d9d9e0; border:1px solid #2b2b36; font-weight:600}
+  .helper{font-size:12px; color:#8e8e98; margin-top:-4px}
+  .result{display:none; margin-top:12px}
+  .prize{padding:24px 16px; text-align:center; border-radius:16px; background:#0f0f17; border:1px dashed #343446}
+  .pill{display:inline-flex; align-items:center; gap:10px; padding:10px 12px; border-radius:12px; border:1px solid #2b2b36; background:#0f0f14; margin-bottom:10px; font-weight:800; letter-spacing:.3px}
+  .swatch{width:18px; height:18px; border-radius:6px; border:1px solid rgba(255,255,255,.25)}
+  .footer{margin-top:14px; color:#8a8a96; font-size:12px; text-align:center}
+
+  @media (max-width:520px){
+    form input, form button{flex:1 1 100%;}
+    .card{padding:16px; border-radius:14px}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="inner">
+    <div class="row">
+      <img src="550CE9D8-9DDD-4BCF-AAB1-4D38E878AD4A.jpeg" alt="Logo Fincas Halloween">
+      <div>
+        <div class="t1">Halloween Fincas 2025</div>
+        <div class="t2">Descubrí el color de tu grupo 🎃</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="card">
+    <p class="sub">Ingresá tu <strong>apellido de familia</strong> (sin nombres) y revelá tu color.</p>
+    <form id="form">
+      <input id="apellido" type="text" autocomplete="family-name" placeholder="Ej.: Parlagreco" required>
+      <button type="submit">Descubrir color</button>
+      <button type="button" class="ghost" id="revelar">Revelar</button>
+    </form>
+    <div class="helper">No distingue mayúsculas ni acentos. Apellidos compuestos van completos (ej.: “Krom Caputo”).</div>
+
+    <div id="result" class="result">
+      <div class="prize">
+        <div class="pill"><div id="swatch" class="swatch"></div><span id="badge">Grupo —</span></div>
+        <h2 id="titulo" style="margin:0 0 8px; font-size:clamp(22px,4vw,32px)">Tu color es…</h2>
+        <div id="colorName" style="font-size:clamp(18px,4vw,26px); opacity:.95"></div>
+        <div style="margin-top:6px; color:#9a9aac; font-size:13px">Mostralo cuando te entreguen la pulsera.</div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:12px">
+          <button type="button" class="ghost" id="shareBtn">Compartir</button>
+          <button type="button" class="ghost" id="copyBtn">Copiar</button>
+        </div>
+      </div>
+    </div>
+    <div class="footer">Funciona 100% en el navegador. No guarda datos personales. — Fincas 🎃</div>
+  </div>
+</div>
+
+<script>
+// ====== Utilidad de normalización compatible con todos los navegadores ======
+function normalizarApellido(s){
+  return (s||"")
+    .split(",")[0]
+    .toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,'') // quitar acentos
+    .replace(/[^a-z\s]/g,'')  // solo letras y espacios
+    .replace(/\s+/g,' ').trim();
+}
+
+const COLORES = {
+  "NARANJA": {nombre:"NARANJA", hex:"#ff7a00"},
+  "AMARILLO": {nombre:"AMARILLO", hex:"#ffeb3b"},
+  "VERDE": {nombre:"VERDE", hex:"#27ae60"}
+};
+
+// ====== Mapeo precargado con claves normalizadas ======
+const MAPEO_PRECARGADO = {
+  "boari": "NARANJA",
+  "canicoba": "NARANJA",
+  "dias": "NARANJA",
+  "giovio": "NARANJA",
+  "gonzalez via": "NARANJA",
+  "lancellotti": "NARANJA",
+  "lopez ballerini": "NARANJA",
+  "parlagreco": "NARANJA",
+  "parrota": "NARANJA",
+  "piacentini": "NARANJA",
+  "ramirez palau": "NARANJA",
+  "robles": "NARANJA",
+  "rondineua": "NARANJA",
+  "savignone": "NARANJA",
+  "tozzoli": "NARANJA",
+  "turiaci": "NARANJA",
+  "antonioli": "AMARILLO",
+  "bochicchio": "AMARILLO",
+  "castro": "AMARILLO",
+  "di bin": "AMARILLO",
+  "esposito": "AMARILLO",
+  "faller": "AMARILLO",
+  "gadaleta": "AMARILLO",
+  "krom caputo": "AMARILLO",
+  "marchesin": "AMARILLO",
+  "mechura": "AMARILLO",
+  "mergiotti": "AMARILLO",
+  "navarro baldacchino": "AMARILLO",
+  "pascual seifert": "AMARILLO",
+  "rombola": "AMARILLO",
+  "simoes": "AMARILLO",
+  "spaltro": "AMARILLO",
+  "torres": "AMARILLO",
+  "waitoller": "AMARILLO",
+  "acuna": "VERDE",
+  "alegre": "VERDE",
+  "aranda": "VERDE",
+  "cabada": "VERDE",
+  "coronel": "VERDE",
+  "davalos": "VERDE",
+  "delgado": "VERDE",
+  "deluca": "VERDE",
+  "derisio": "VERDE",
+  "diani": "VERDE",
+  "galanzino": "VERDE",
+  "hervith": "VERDE",
+  "humann": "VERDE",
+  "lafrancani": "VERDE",
+  "manini": "VERDE",
+  "manzo finazzi": "VERDE",
+  "micieli": "VERDE",
+  "pierucci": "VERDE",
+  "pineiro": "VERDE",
+  "rey prado": "VERDE",
+  "schettino": "VERDE"
+};
+
+let MAPEO = Object.assign({}, MAPEO_PRECARGADO); // sin storage para evitar conflictos
+const form = document.getElementById('form');
+const inp = document.getElementById('apellido');
+const res = document.getElementById('result');
+const badge = document.getElementById('badge');
+const swatch = document.getElementById('swatch');
+const colorName = document.getElementById('colorName');
+const shareBtn = document.getElementById('shareBtn');
+const copyBtn = document.getElementById('copyBtn');
+const revelarBtn = document.getElementById('revelar');
+
+function mostrar(colorClave){
+  const c = COLORES[colorClave];
+  if(!c){ colorName.textContent = "—"; badge.textContent = "Sin asignar"; res.style.display='block'; return; }
+  badge.textContent = "Grupo " + c.nombre;
+  colorName.textContent = c.nombre;
+  swatch.style.background = c.hex;
+  res.style.display = 'block';
+}
+
+function consultar(){
+  const ap = normalizarApellido(inp.value);
+  if(!ap){ alert("Ingresá un apellido, por favor."); return; }
+  const color = MAPEO[ap];
+  if(!color){ mostrar(null); alert("Apellido no encontrado. Revisá ortografía o consultá a la organización."); return; }
+  mostrar(color);
+}
+
+form.addEventListener('submit', (e)=>{ e.preventDefault(); consultar(); });
+revelarBtn.addEventListener('click', consultar);
+shareBtn.addEventListener('click', async ()=>{
+  const ap = normalizarApellido(inp.value);
+  const color = MAPEO[ap];
+  if(navigator.share && color){ try{ await navigator.share({title:"Color de grupo", text:`${ap} → ${color}`}); }catch(e){} }
+  else{ navigator.clipboard.writeText(`${ap} → ${color||"SIN ASIGNAR"}`); }
+});
+copyBtn.addEventListener('click', ()=>{
+  const ap = normalizarApellido(inp.value);
+  const color = MAPEO[ap] || "SIN ASIGNAR";
+  navigator.clipboard.writeText(`${ap} → ${color}`);
+});
+</script>
+</body>
+</html>
